@@ -27,6 +27,8 @@
             display: block;
             z-index: -1;
             pointer-events: none;
+            /* Optimización: evitar el antialiasing excesivo en canvas */
+            image-rendering: crisp-edges;
         }
 
         #hero-section {
@@ -42,15 +44,21 @@
             padding-bottom: 120px;
         }
 
-        @keyframes float { 0%,100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-15px) rotate(2deg); } }
-        @keyframes float-reverse { 0%,100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(12px) rotate(-2deg); } }
-        @keyframes pulse-glow { 0%,100% { opacity: 0.95; filter: drop-shadow(0 0 20px rgba(59,130,246,0.4)); } 50% { opacity: 1; filter: drop-shadow(0 0 35px rgba(59,130,246,0.8)); } }
+        /* Animaciones CSS más ligeras */
+        @keyframes float { 0%,100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-10px) rotate(1deg); } }
+        @keyframes float-reverse { 0%,100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(8px) rotate(-1deg); } }
+        @keyframes pulse-glow { 0%,100% { opacity: 0.95; filter: drop-shadow(0 0 15px rgba(59,130,246,0.3)); } 50% { opacity: 1; filter: drop-shadow(0 0 25px rgba(59,130,246,0.6)); } }
         
-        .animate-float-1 { animation: float 6s ease-in-out infinite; }
-        .animate-float-2 { animation: float-reverse 7s ease-in-out infinite 1s; }
-        .animate-float-3 { animation: float 8s ease-in-out infinite 2s; }
+        @keyframes shine {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
         
-        .logo-container { animation: pulse-glow 4s ease-in-out infinite; }
+        .animate-float-1 { animation: float 6s ease-in-out infinite; will-change: transform; }
+        .animate-float-2 { animation: float-reverse 7s ease-in-out infinite 1s; will-change: transform; }
+        .animate-float-3 { animation: float 8s ease-in-out infinite 2s; will-change: transform; }
+        
+        .logo-container { animation: pulse-glow 4s ease-in-out infinite; will-change: filter; }
 
         .swoosh-ring {
             border-radius: 50%;
@@ -59,13 +67,34 @@
             border-left: 10px solid #60a5fa;
             border-right: 4px solid transparent;
             box-shadow: 0 10px 30px rgba(59,130,246,0.5);
-            transform: rotate(-15deg) scaleX(1.1) scaleY(0.9);
+            transform: rotate(-15deg) scaleX(1.4) scaleY(0.8);
         }
 
+        .metallic-text {
+            background: linear-gradient(to right, #fff 20%, #87ceeb 40%, #fff 60%, #87ceeb 80%);
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: shine 8s linear infinite;
+        }
+
+        .gold-shine {
+            background: linear-gradient(to right, #fbbf24 20%, #fffbeb 40%, #fbbf24 60%, #fffbeb 80%);
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: shine 6s linear infinite;
+        }
+
+        .text-shadow-hard { text-shadow: 4px 4px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
+        .text-shadow-glow { text-shadow: 0 0 20px rgba(251, 191, 36, 0.6), 2px 2px 0 #000; }
+
         @keyframes arrow-pulse {
-            0%   { opacity: 0.15; transform: translateY(-3px); text-shadow: 0 0 0px transparent; }
-            50%  { opacity: 1;    transform: translateY(3px) scale(1.1); text-shadow: 0 0 15px #fbbf24; }
-            100% { opacity: 0.15; transform: translateY(-3px); text-shadow: 0 0 0px transparent; }
+            0%   { opacity: 0.15; transform: translateY(-2px); }
+            50%  { opacity: 1;    transform: translateY(2px) scale(1.05); text-shadow: 0 0 8px #fbbf24; }
+            100% { opacity: 0.15; transform: translateY(-2px); }
         }
         .arrow-chevron {
             font-size: 32px;
@@ -83,7 +112,7 @@
         }
         @keyframes slide-glow {
             0%,100% { filter: drop-shadow(0 0 8px rgba(251,191,36,0.4)); }
-            50%      { filter: drop-shadow(0 0 15px rgba(251,191,36,0.9)); }
+            50%      { filter: drop-shadow(0 0 12px rgba(251,191,36,0.8)); }
         }
         .slide-text {
             font-family: 'Syne', sans-serif;
@@ -168,6 +197,8 @@
         @media (max-width: 520px) {
             .g-card-body { padding: 16px 15px; } .g-card-header { padding: 15px 15px; }
             .dixie-grid { grid-template-columns: 1fr; } .steps-index { grid-template-columns: repeat(3,1fr); }
+            .logo-container .absolute.-right-12 { right: -6px; }
+            .logo-container .absolute.-right-12 .text-5xl { font-size: 2.2rem; }
         }
     </style>
 </head>
@@ -186,71 +217,45 @@
         </p>
     </div>
 
-    <!-- LOGO CENTRAL -->
+    <!-- LOGO CENTRAL (CON RAYO SEPARADO) -->
     <div class="relative z-10 w-full max-w-4xl flex flex-col justify-center items-center px-4" style="margin-top: 20px;">
-        <!-- Iconos flotantes -->
+        <!-- Íconos flotantes de fondo -->
         <div class="absolute inset-0 w-full h-full pointer-events-none">
             <div class="absolute top-[8%] left-[8%] animate-float-1" style="color: #d1d5db; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));"><i class="fa-solid fa-box-open" style="font-size: 4.5rem;"></i></div>
             <div class="absolute top-[16%] right-[10%] animate-float-2" style="color: #d1d5db; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));"><i class="fa-solid fa-credit-card" style="font-size: 3.5rem;"></i></div>
             <div class="absolute bottom-[16%] right-[6%] animate-float-3" style="color: #9ca3af; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3)); transform: scale(0.7);"><i class="fa-solid fa-credit-card" style="font-size: 3.5rem;"></i></div>
         </div>
 
-        <div class="logo-container relative flex flex-col items-center justify-center z-20" style="transform: skewX(-4deg);">
-
+        <div class="logo-container relative flex flex-col items-center justify-center transform -skew-x-6 z-20">
             <!-- Swoosh azul orbital -->
             <div class="absolute swoosh-ring z-0" style="width:130%; height:130%; left:-15%; top:-15%;"></div>
 
-            <!-- Íconos flotantes independientes (fuera del logo, posición absoluta) -->
-            <!-- Gamepad — arriba izquierda del cluster -->
-            <div class="absolute z-30 animate-float-1" style="right:-30px; bottom: 80px; transform: rotate(6deg);">
-                <i class="fa-solid fa-gamepad" style="font-size: clamp(28px,7vw,40px); color:#22c55e; filter: drop-shadow(2px 3px 6px rgba(0,0,0,0.7));"></i>
-            </div>
-            <!-- Bolsa roja — encima del gamepad -->
-            <div class="absolute z-30 animate-float-2" style="right:-58px; bottom: 50px; transform: rotate(-3deg);">
-                <i class="fa-solid fa-shopping-bag" style="font-size: clamp(36px,9vw,52px); color:#ef4444; filter: drop-shadow(2px 3px 6px rgba(0,0,0,0.7));"></i>
-            </div>
-            <!-- Hamburguesa — derecha abajo -->
-            <div class="absolute z-30 animate-float-3" style="right:-28px; bottom: 20px; transform: rotate(4deg);">
-                <i class="fa-solid fa-hamburger" style="font-size: clamp(26px,6vw,38px); color:#eab308; filter: drop-shadow(2px 3px 6px rgba(0,0,0,0.7));"></i>
+            <!-- YDis con rayo separado -->
+            <div class="relative z-10 flex items-center font-montserrat italic font-black text-7xl md:text-8xl tracking-tight mb-2">
+                <div class="relative mr-2">
+                    <i class="fa-solid fa-bolt text-yellow-400 absolute -left-6 top-1 text-shadow-glow transform scale-110 rotate-12 z-20"></i>
+                    <span class="gold-shine relative z-10 text-shadow-hard pl-2">Y</span>
+                </div>
+                <span class="metallic-text text-shadow-hard">Dis</span>
             </div>
 
-            <!-- ⚡ YDis — negro metálico con borde dorado, sombra marrón -->
-            <div class="relative z-10 flex items-center font-montserrat italic font-black tracking-tight" style="font-size: clamp(62px,17vw,115px); margin-bottom: -8px;">
-                <i class="fa-solid fa-bolt" style="font-size:0.7em; color:#facc15; transform:rotate(14deg); filter: drop-shadow(0 0 14px rgba(251,191,36,0.9)); margin-right:4px;"></i>
-                <span style="
-                    color: #111827;
-                    -webkit-text-stroke: 2.5px #ca8a04;
-                    text-shadow: 4px 5px 0px #78350f, 0 0 18px rgba(234,179,8,0.4);
-                    paint-order: stroke fill;
-                ">YDis</span>
-            </div>
-
-            <!-- MARKET — caja roja inclinada -->
-            <div class="relative z-20 font-montserrat italic font-bold text-white border-4 border-white transform -rotate-2"
-                 style="
-                    background: #dc2626;
-                    font-size: clamp(24px,6.5vw,40px);
-                    letter-spacing: 2px;
-                    padding: 4px 28px 4px 22px;
-                    box-shadow: 0 6px 20px rgba(220,38,38,0.6);
-                    margin-top: -2px;
-                 ">
+            <!-- MARKET (caja roja inclinada) -->
+            <div class="relative z-20 bg-red-600 text-white font-montserrat italic font-bold text-3xl md:text-4xl px-8 py-1 border-4 border-white shadow-[0_5px_15px_rgba(220,38,38,0.6)] transform -rotate-2 -mt-4">
                 MARKET
             </div>
 
-            <!-- FLASH — dorado degradado con línea brillante abajo -->
-            <div class="relative z-10 font-montserrat italic font-black transform -rotate-2" style="font-size: clamp(42px,11vw,70px); margin-top: 2px;">
-                <span style="
-                    background: linear-gradient(to bottom, #fde047 10%, #d97706 55%, #92400e 100%);
-                    -webkit-background-clip: text;
-                    background-clip: text;
-                    color: transparent;
-                    filter: drop-shadow(4px 5px 0px #1c0a00) drop-shadow(0 0 16px rgba(251,191,36,0.7));
-                ">FLASH</span>
-                <!-- Línea dorada subrayado -->
-                <div style="position:absolute; bottom:4px; left:0; width:100%; height:5px; background:#facc15; box-shadow:0 0 12px #fbbf24; transform:skewX(12deg); border-radius:2px;"></div>
+            <!-- FLASH (dorado con línea inferior) -->
+            <div class="relative z-10 font-montserrat italic font-black text-5xl md:text-6xl mt-0 transform -rotate-2">
+                <span class="gold-shine text-shadow-glow">FLASH</span>
+                <div class="absolute -bottom-2 left-0 w-full h-1 bg-yellow-400 shadow-[0_0_10px_#fbbf24] transform skew-x-12"></div>
             </div>
 
+            <!-- Íconos agrupados -->
+            <div class="absolute -right-12 bottom-6 flex items-center gap-1 animate-float-1 z-30 drop-shadow-xl transform rotate-6">
+                <i class="fa-solid fa-gamepad text-green-500 text-4xl"></i>
+                <i class="fa-solid fa-shopping-bag text-red-500 text-5xl -ml-2 -mt-4"></i>
+                <i class="fa-solid fa-hamburger text-yellow-500 text-4xl -ml-2"></i>
+            </div>
         </div>
     </div>
 
@@ -265,12 +270,10 @@
     </div>
 </section>
 
-<!-- GUÍA DE USUARIO -->
+<!-- GUÍA DE USUARIO (completa) -->
 <section id="guide-section">
     <div class="guide-inner">
-
         <div class="guide-separator"></div>
-
         <div class="mb-12 text-center relative z-10">
             <div class="flex items-center justify-center gap-3 mb-2">
                 <i class="fa-solid fa-bolt text-[#f97316] text-4xl md:text-5xl drop-shadow-lg"></i>
@@ -296,15 +299,9 @@
             </div>
             <div class="g-card-body">
                 <ul class="step-list">
-                    <li><div class="step-dot">1</div>
-                        <p>Abre tu aplicación de VPN (como Windscribe, ProtonVPN o Psiphon).</p>
-                    </li>
-                    <li><div class="step-dot">2</div>
-                        <p>Pulsa el botón <strong>Conectar</strong> y espera a que aparezca el ícono de candado 🔒 en la barra superior de tu dispositivo.</p>
-                    </li>
-                    <li><div class="step-dot">3</div>
-                        <p>Con la VPN <strong>activa</strong>, abre tu navegador web y entra al enlace: <strong>ydis-market.github.io</strong>.</p>
-                    </li>
+                    <li><div class="step-dot">1</div><p>Abre tu aplicación de VPN (como Windscribe, ProtonVPN o Psiphon).</p></li>
+                    <li><div class="step-dot">2</div><p>Pulsa el botón <strong>Conectar</strong> y espera a que aparezca el ícono de candado 🔒 en la barra superior de tu dispositivo.</p></li>
+                    <li><div class="step-dot">3</div><p>Con la VPN <strong>activa</strong>, abre tu navegador web y entra al enlace: <strong>ydis-market.github.io</strong>.</p></li>
                 </ul>
                 <div class="tip-box"><span class="ti">💡</span><span>Recuerda mantener la VPN activa mientras exploras la tienda para asegurar que todo funcione correctamente.</span></div>
             </div>
@@ -392,139 +389,161 @@
                 </div>
             </div>
         </div>
-
     </div>
 </section>
 
 <script>
-    const canvas = document.getElementById('energyCanvas');
-    const ctx = canvas.getContext('2d', { alpha: false });
-    let width, height, particles = [], lastTime = 0, time = 0;
-
-    const waves = [
-        { r:14,  g:165, b:233, alpha:0.15, amp:80,  freq:0.002,  speed:0.04,  yOffset:0.4  },
-        { r:59,  g:130, b:246, alpha:0.1,  amp:120, freq:0.0015, speed:0.032, yOffset:0.5  },
-        { r:251, g:191, b:36,  alpha:0.08, amp:60,  freq:0.003,  speed:0.06,  yOffset:0.6  },
-        { r:224, g:242, b:254, alpha:0.05, amp:100, freq:0.001,  speed:0.02,  yOffset:0.45 },
-    ];
-    const WAVE_STEP = 10;
-    let waveGradients = [];
-
-    function buildGradients() {
-        waveGradients = waves.map(w => {
-            const g = ctx.createLinearGradient(0, height * 0.2, 0, height);
-            g.addColorStop(0, `rgba(${w.r},${w.g},${w.b},${w.alpha})`);
-            g.addColorStop(1, `rgba(${w.r},${w.g},${w.b},0)`);
-            return g;
-        });
-    }
-
-    function resize() {
-        width  = canvas.width  = window.innerWidth;
-        height = canvas.height = window.innerHeight;
-        buildGradients();
-        initParticles();
-    }
-    window.addEventListener('resize', resize);
-
-    const PARTICLE_COLORS = ['#fbbf24','#0ea5e9','#ffffff'];
-    const GLOW_SIZE = 18;
-    let particleSprites = [];
-
-    function buildSprites() {
-        particleSprites = PARTICLE_COLORS.map(color => {
-            const oc = document.createElement('canvas');
-            oc.width = oc.height = GLOW_SIZE * 2;
-            const ot = oc.getContext('2d');
-            const grad = ot.createRadialGradient(GLOW_SIZE,GLOW_SIZE,0,GLOW_SIZE,GLOW_SIZE,GLOW_SIZE);
-            grad.addColorStop(0, color);
-            grad.addColorStop(0.3, color);
-            grad.addColorStop(1, 'transparent');
-            ot.fillStyle = grad;
-            ot.fillRect(0,0,GLOW_SIZE*2,GLOW_SIZE*2);
-            return oc;
-        });
-    }
-    buildSprites();
-
-    class Particle {
-        constructor() { this.reset(); this.y = Math.random() * (height || 600); }
-        reset() {
-            this.x = Math.random() * (width || 800);
-            this.y = (height || 600) + Math.random() * 100;
-            this.size = Math.random() * 2 + 0.5;
-            this.speedY = -(Math.random() * 0.5 + 0.2);
-            this.speedX = (Math.random() - 0.5) * 0.5;
-            this.opacity = Math.random() * 0.5 + 0.1;
-            this.spriteIdx = Math.floor(Math.random() * PARTICLE_COLORS.length);
+    (function(){
+        // Optimización del canvas para máximo rendimiento
+        const canvas = document.getElementById('energyCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let width, height;
+        let particles = [];
+        let time = 0;
+        let lastTimestamp = 0;
+        
+        // Configuración de ondas (reducida complejidad)
+        const waves = [
+            { r:14,  g:165, b:233, alpha:0.12, amp:70,  freq:0.0018, speed:0.035, yOffset:0.4 },
+            { r:59,  g:130, b:246, alpha:0.08, amp:100, freq:0.0012, speed:0.028, yOffset:0.5 },
+            { r:251, g:191, b:36,  alpha:0.06, amp:50,  freq:0.0025, speed:0.05,  yOffset:0.6 },
+            { r:224, g:242, b:254, alpha:0.04, amp:80,  freq:0.0008, speed:0.018, yOffset:0.45 }
+        ];
+        
+        // Gradientes precalculados
+        let waveGradients = [];
+        
+        function buildGradients() {
+            waveGradients = waves.map(w => {
+                const g = ctx.createLinearGradient(0, height * 0.2, 0, height);
+                g.addColorStop(0, `rgba(${w.r},${w.g},${w.b},${w.alpha})`);
+                g.addColorStop(1, `rgba(${w.r},${w.g},${w.b},0)`);
+                return g;
+            });
         }
-        update(dt) {
-            const t = dt * 60;
-            this.x += this.speedX * t + Math.sin(this.y * 0.01) * 0.2 * t;
-            this.y += this.speedY * t;
-            if (this.y < -10 || this.x < -10 || this.x > width + 10) this.reset();
-        }
-        draw() {
-            const s = this.size * GLOW_SIZE;
-            ctx.globalAlpha = this.opacity;
-            ctx.drawImage(particleSprites[this.spriteIdx], this.x - s, this.y - s, s*2, s*2);
-        }
-    }
-
-    function initParticles() {
-        particles = [];
-        for (let i = 0; i < 80; i++) particles.push(new Particle());
-    }
-
-    resize();
-
-    function animate(timestamp) {
-        const dt = Math.min((timestamp - lastTime) / 1000, 0.05);
-        lastTime = timestamp; time += dt;
-
-        ctx.globalAlpha = 1;
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.fillStyle = '#030a1c';
-        ctx.fillRect(0, 0, width, height);
-
-        ctx.globalCompositeOperation = 'screen';
-        waves.forEach((wave, i) => {
-            const t2 = time * wave.speed;
-            ctx.beginPath();
-            ctx.moveTo(0, height * wave.yOffset);
-            for (let x = 0; x <= width; x += WAVE_STEP) {
-                const y = height * wave.yOffset
-                    + Math.sin(x * wave.freq + t2) * wave.amp
-                    + Math.sin(x * wave.freq * 2.5 - t2 * 1.5) * (wave.amp * 0.3);
-                ctx.lineTo(x, y);
+        
+        // Partículas más livianas (solo círculos)
+        class Particle {
+            constructor() {
+                this.reset();
+                this.y = Math.random() * height;
             }
-            ctx.lineTo(width, height); ctx.lineTo(0, height); ctx.closePath();
-            ctx.fillStyle = waveGradients[i]; ctx.fill();
-
-            ctx.beginPath();
-            for (let x = 0; x <= width; x += WAVE_STEP) {
-                const y = height * wave.yOffset
-                    + Math.sin(x * wave.freq + t2) * wave.amp
-                    + Math.sin(x * wave.freq * 2.5 - t2 * 1.5) * (wave.amp * 0.3);
-                x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+            reset() {
+                this.x = Math.random() * width;
+                this.y = height + Math.random() * 80;
+                this.size = Math.random() * 1.8 + 0.4;
+                this.speedY = -(Math.random() * 0.6 + 0.2);
+                this.speedX = (Math.random() - 0.5) * 0.3;
+                this.opacity = Math.random() * 0.4 + 0.1;
+                const colors = ['#fbbf24', '#0ea5e9', '#ffffff'];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
             }
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = `rgba(${wave.r},${wave.g},${wave.b},${wave.alpha * 2})`;
-            ctx.shadowBlur = 12;
-            ctx.shadowColor = `rgb(${wave.r},${wave.g},${wave.b})`;
-            ctx.stroke();
-            ctx.shadowBlur = 0;
+            update(dt) {
+                const step = dt * 60;
+                this.x += this.speedX * step;
+                this.y += this.speedY * step;
+                this.x += Math.sin(this.y * 0.015) * 0.15 * step;
+                if (this.y < -20 || this.x < -20 || this.x > width + 20) {
+                    this.reset();
+                }
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = this.opacity;
+                ctx.fill();
+            }
+        }
+        
+        function initParticles() {
+            particles = [];
+            const count = Math.min(45, Math.floor(window.innerWidth / 30)); // adaptativo
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle());
+            }
+        }
+        
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            buildGradients();
+            initParticles();
+        }
+        
+        window.addEventListener('resize', () => {
+            resizeCanvas();
         });
-
-        ctx.globalCompositeOperation = 'lighter';
-        particles.forEach(p => { p.update(dt); p.draw(); });
-
-        ctx.globalAlpha = 1;
-        ctx.globalCompositeOperation = 'source-over';
-        requestAnimationFrame(animate);
-    }
-
-    requestAnimationFrame(ts => { lastTime = ts; requestAnimationFrame(animate); });
+        
+        // Dibujado optimizado de ondas
+        function drawWaves() {
+            const step = 25; // menos segmentos
+            for (let i = 0; i < waves.length; i++) {
+                const w = waves[i];
+                const t = time * w.speed;
+                ctx.beginPath();
+                ctx.moveTo(0, height * w.yOffset);
+                for (let x = 0; x <= width; x += step) {
+                    const y = height * w.yOffset
+                        + Math.sin(x * w.freq + t) * w.amp
+                        + Math.sin(x * w.freq * 2.2 - t * 1.3) * (w.amp * 0.25);
+                    ctx.lineTo(x, y);
+                }
+                ctx.lineTo(width, height);
+                ctx.lineTo(0, height);
+                ctx.closePath();
+                ctx.fillStyle = waveGradients[i];
+                ctx.fill();
+                
+                // Borde superior (sutil, sin sombra pesada)
+                ctx.beginPath();
+                for (let x = 0; x <= width; x += step) {
+                    const y = height * w.yOffset
+                        + Math.sin(x * w.freq + t) * w.amp
+                        + Math.sin(x * w.freq * 2.2 - t * 1.3) * (w.amp * 0.25);
+                    if (x === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.lineWidth = 1.5;
+                ctx.strokeStyle = `rgba(${w.r},${w.g},${w.b},${w.alpha * 1.5})`;
+                ctx.stroke();
+            }
+        }
+        
+        let frameRequest;
+        function animate(now) {
+            if (!lastTimestamp) {
+                lastTimestamp = now;
+                frameRequest = requestAnimationFrame(animate);
+                return;
+            }
+            let dt = Math.min((now - lastTimestamp) / 1000, 0.033);
+            lastTimestamp = now;
+            time += dt;
+            
+            // Limpiar fondo
+            ctx.fillStyle = '#030a1c';
+            ctx.fillRect(0, 0, width, height);
+            
+            // Dibujar ondas
+            ctx.globalCompositeOperation = 'screen';
+            drawWaves();
+            
+            // Dibujar partículas
+            ctx.globalCompositeOperation = 'lighter';
+            for (let p of particles) {
+                p.update(dt);
+                p.draw();
+            }
+            
+            ctx.globalCompositeOperation = 'source-over';
+            frameRequest = requestAnimationFrame(animate);
+        }
+        
+        resizeCanvas();
+        animate();
+    })();
 </script>
 </body>
 </html>
